@@ -135,11 +135,15 @@ async function loadMarkdown(path) {
         </div>
     `;
 
+    console.log('Fetching doc from:', path);
+
     try {
-        const response = await fetch(path);
+        // Use ./ to ensure relative pathing works on GH Pages regardless of trailing slash
+        const response = await fetch('./' + path);
         
         if (!response.ok) {
-            throw new Error('Arquivo no encontrado');
+            console.error('Fetch failed with status:', response.status);
+            throw new Error('Arquivo não encontrado');
         }
 
         const text = await response.text();
@@ -161,11 +165,13 @@ async function loadMarkdown(path) {
         fixMarkdownLinks();
 
     } catch (err) {
+        console.error('Error loading markdown:', err);
         markdownViewer.innerHTML = `
-            <div class="error-state">
-                <h1>Oops! Página não encontrada</h1>
-                <p>Não conseguimos carregar o conteúdo solicitado (${path}).</p>
-                <a href="#" class="nav-link" style="display:inline-block; margin-top:1rem; border:1px solid var(--primary)">Voltar para a Introdução</a>
+            <div class="error-state" style="text-align: center; padding: 3rem 0;">
+                <h1 style="font-size: 4rem; margin-bottom: 1rem;">📭</h1>
+                <h2 style="font-family: var(--font-heading); margin-bottom: 1rem;">Página não encontrada</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Não conseguimos carregar: <code>${path}</code></p>
+                <a href="#" class="nav-link" style="display:inline-block; padding: 0.75rem 1.5rem; background: var(--primary); color: white; text-decoration: none; border-radius: 8px;">Voltar para o Início</a>
             </div>
         `;
     }
